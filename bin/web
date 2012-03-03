@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+require "unicorn"
+require "./lib/git_http"
+
+APP_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
+
+if git_remote = ENV["GIT_REMOTE"]
+  git_dir = File.join(APP_DIR, File.basename(git_remote))
+  puts `rm -rf #{git_dir}; git init --bare #{git_dir}`
+else
+  abort "GIT_REMOTE must be set"
+end
+
+app = GitHttp::App.new({
+  :project_root => APP_DIR,
+  :upload_pack  => true,
+  :receive_pack => true,
+})
+
+app = Rack::CommonLogger.new(app)
+
+opts = {
+  listeners:        "0.0.0.0:#{ENV["PORT"] || 5000}",
+  timeout:          1800,
+  worker_processes: 1
+}
+
+Unicorn::HttpServer.new(app, opts).start.join
