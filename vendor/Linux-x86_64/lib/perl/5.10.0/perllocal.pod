@@ -1,0 +1,22 @@
+=head2 Thu Jan 19 15:30:24 2012: C<Module> L<Git|Git>
+
+=over 4
+
+=item *
+
+C<installed into: /app/vendor/Linux-x86_64/share/perl/5.10.0>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.01>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+

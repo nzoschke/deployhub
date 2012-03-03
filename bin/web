@@ -3,7 +3,10 @@ require "unicorn"
 require "./lib/git_http"
 
 APP_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
+SYSTEM  = `echo $(uname)-$(uname -m)`.strip
 
+ENV["PATH"] = ["#{APP_DIR}/vendor/#{SYSTEM}/bin", ENV["PATH"]].join(":")
+puts ENV["PATH"]
 if git_remote = ENV["GIT_REMOTE"]
   git_dir = File.join(APP_DIR, File.basename(git_remote))
   system "rm -rf #{git_dir}; git init --bare #{git_dir}"
