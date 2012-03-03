@@ -6,7 +6,8 @@ APP_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
 
 if git_remote = ENV["GIT_REMOTE"]
   git_dir = File.join(APP_DIR, File.basename(git_remote))
-  puts `rm -rf #{git_dir}; git init --bare #{git_dir}`
+  system "rm -rf #{git_dir}; git init --bare #{git_dir}"
+  system "cp #{APP_DIR}/bin/pre-receive #{git_dir}/hooks/"
 else
   abort "GIT_REMOTE must be set"
 end
