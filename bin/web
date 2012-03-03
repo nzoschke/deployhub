@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require "unicorn"
+require "uri"
 require "./lib/git_http"
 
 APP_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
@@ -8,9 +9,21 @@ SYSTEM  = `echo $(uname)-$(uname -m)`.strip
 ENV["PATH"] = ["#{APP_DIR}/vendor/#{SYSTEM}/bin", ENV["PATH"]].join(":")
 puts ENV["PATH"]
 if git_remote = ENV["GIT_REMOTE"]
-  git_dir = File.join(APP_DIR, File.basename(git_remote))
-  system "rm -rf #{git_dir}; git init --bare #{git_dir}"
-  system "cp #{APP_DIR}/bin/pre-receive #{git_dir}/hooks/"
+  uri = URI.parse(git_remote)
+
+  repo = File.join(APP_DIR, File.basename(uri.path))
+  system "rm -rf #{repo}; git init --bare #{repo}"
+  system "cp #{APP_DIR}/bin/pre-receive #{repo}/hooks/"
+
+  netrc = File.join(ENV["HOME"], ".netrc")
+  File.open(netrc, "w") { |f|
+    f.puts "machine #{uri.host}"
+    f.puts "  login #{uri.user}"
+    f.puts "  password #{uri.password}"
+  } unless File.exists?(netrc)
+
+  uri.user = uri.password = nil
+  ENV["GIT_REMOTE"] = uri.to_s
 else
   abort "GIT_REMOTE must be set"
 end
