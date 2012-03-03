@@ -4,11 +4,14 @@ set -ex
 read oldrev newrev ref
 git push --dry-run $GIT_REMOTE $newrev:$ref
 
-printf "Compile and release"
-for i in 1 2 3 4 5; do
-  printf .
-  sleep 0.5
-done
-printf "\n"
+(
+  set +x
+  printf "Compile and release"
+  for i in 1 2 3 4 5; do
+    printf .
+    sleep 0.5
+  done
+  printf "\n"
+)
 
 git push $GIT_REMOTE $newrev:$ref
