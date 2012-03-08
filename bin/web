@@ -15,8 +15,7 @@ if git_remote = ENV["GIT_REMOTE"]
   uri = URI.parse(git_remote)
 
   repo = File.join(APP_DIR, File.basename(uri.path))
-  system "rm -rf #{repo}; git init --bare #{repo}"
-  system "cp #{APP_DIR}/bin/pre-receive #{repo}/hooks/"
+  system "rm -rf #{repo}; mkdir #{repo}"
 
   netrc = File.join(ENV["HOME"], ".netrc")
   File.open(netrc, "w") { |f|

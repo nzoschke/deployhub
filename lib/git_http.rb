@@ -58,6 +58,11 @@ class GitHttp
 
     def service_rpc
       return render_no_access if !has_access(@rpc, true)
+
+      cmd = git_command("clone --bare #{ENV["GIT_REMOTE"]} .")
+      system cmd
+      system "cp #{APP_DIR}/bin/pre-receive #{@dir}/hooks/"
+
       input = read_body
 
       @res = Rack::Response.new
