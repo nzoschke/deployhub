@@ -2,7 +2,6 @@
 set -ex
 
 read oldrev newrev ref
-git push --dry-run $GIT_REMOTE $newrev:$ref
 
 (
   set +x
