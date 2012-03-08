@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+require "bundler"
+Bundler.setup
+
 require "unicorn"
 require "uri"
 require "./lib/git_http"
@@ -6,8 +9,8 @@ require "./lib/git_http"
 APP_DIR = File.expand_path(File.join(__FILE__, "..", ".."))
 SYSTEM  = `echo $(uname)-$(uname -m)`.strip
 
-ENV["PATH"] = ["#{APP_DIR}/vendor/#{SYSTEM}/bin", ENV["PATH"]].join(":")
-puts ENV["PATH"]
+ENV["PATH"] = "#{APP_DIR}/vendor/#{SYSTEM}/bin:#{ENV["PATH"]}"
+
 if git_remote = ENV["GIT_REMOTE"]
   uri = URI.parse(git_remote)
 
