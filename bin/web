@@ -27,6 +27,7 @@ if git_remote = ENV["GIT_REMOTE"]
 
   uri.user = uri.password = nil
   ENV["GIT_REMOTE"] = uri.to_s
+  ENV["GIT_REMOTE_AUTH"] = git_remote
 else
   abort "GIT_REMOTE must be set"
 end
