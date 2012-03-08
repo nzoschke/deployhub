@@ -1,6 +1,7 @@
 require 'zlib'
 require 'rack/request'
 require 'rack/response'
+require 'rack/streaming_proxy'
 require 'rack/utils'
 require 'time'
 
@@ -78,17 +79,24 @@ class GitHttp
       service_name = get_service_type
 
       if has_access(service_name)
-        cmd = git_command("#{service_name} --stateless-rpc --advertise-refs .")
-        refs = `#{cmd}`
+        req  = Rack::Request.new(@env)
+        uri =  ENV["GIT_REMOTE_AUTH"]
+        uri += "/info/refs"
+        uri += "?" + @env["QUERY_STRING"] unless @env["QUERY_STRING"].empty?
 
-        @res = Rack::Response.new
-        @res.status = 200
-        @res["Content-Type"] = "application/x-git-%s-advertisement" % service_name
-        hdr_nocache
-        @res.write(pkt_write("# service=git-#{service_name}\n"))
-        @res.write(pkt_flush)
-        @res.write(refs)
-        @res.finish
+        begin # only want to catch proxy errors, not app errors
+          proxy = Rack::StreamingProxy::ProxyRequest.new(req, uri)
+          [proxy.status, proxy.headers, proxy]
+        rescue => e
+          msg = "Proxy error when proxying to #{ENV["GIT_REMOTE"]}: #{e.class}: #{e.message}"
+          @env["rack.errors"].puts msg
+          @env["rack.errors"].puts e.backtrace.map { |l| "\t" + l }
+          @env["rack.errors"].flush
+          raise StandardError, msg
+        end
+
+        proxy = Rack::StreamingProxy::ProxyRequest.new(req, uri)
+        [proxy.status, proxy.headers, proxy]
       else
         dumb_info_refs
       end
